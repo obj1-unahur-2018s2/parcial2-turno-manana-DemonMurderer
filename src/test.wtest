@@ -1,0 +1,81 @@
+import Viajes.*
+import Socios.*
+describe "Tests" {
+	const roque = new SocioTranquilo(maxActividad=2)
+	const ana = new SocioRelajado(maxActividad=3, idiomas = #{"español","ingles"})
+	const pepita = new SocioCoherente(maxActividad=5)
+	const viajesDePlaya = new ViajeDePlaya(diasDeActividad = 10, metros = 1200)
+	const excursionACiudad = new ExcursionACiudad(atracciones = 5)
+	const excursionACiudadTropical = new ExcursionACiudadTropical(atracciones = 5)
+	const clasesDeGym = new ClasesDeGym()
+	const libro = new Libro(paginas=500,idioma="Español", autor="qcyo")
+	const tallerLiterario = new TallerLiterario(idiomas= #{"español", "ingles", "aleman"}, libros = #{libro})
+	const salidaDeTrekking = new SalidaDeTrekking(kilometros = 80, diasDeSol=200, diasDeActividad=10, idiomas = #{"ingles", "español"})
+	fixture{
+		roque.registrarActividad(new ViajeDePlaya(metros=1000))
+		roque.registrarActividad(new ViajeDePlaya(metros=2000))
+		ana.registrarActividad(new ViajeDePlaya(metros=1000))
+		ana.registrarActividad(new ViajeDePlaya(metros=2000))
+		pepita.registrarActividad(new ViajeDePlaya(metros=1000))
+		pepita.registrarActividad(new ViajeDePlaya(metros=2000))
+	}
+	test "Viajes de playa" {
+		assert.notThat(viajesDePlaya.esInteresante())
+		assert.that(viajesDePlaya.sirveParaBroncearse())
+		assert.that(viajesDePlaya.implicaEsfuerzo())
+		assert.equals(2.4, viajesDePlaya.diasDeActividad())
+	}
+	test "Excursion a Ciudad"{
+		assert.that(excursionACiudad.implicaEsfuerzo())
+		assert.notThat(excursionACiudad.sirveParaBroncearse())
+		assert.equals(2.5, excursionACiudad.diasDeActividad())
+		assert.that(excursionACiudad.esInteresante())
+	}
+	test "Excursion a Ciudad Tropical"{
+		assert.that(excursionACiudadTropical.implicaEsfuerzo())
+		assert.that(excursionACiudadTropical.sirveParaBroncearse())
+		assert.equals(3.5, excursionACiudadTropical.diasDeActividad())
+		assert.that(excursionACiudadTropical.esInteresante())
+	}
+	test "Salida de Trekking" {
+		assert.that(salidaDeTrekking.implicaEsfuerzo())
+		assert.that(salidaDeTrekking.sirveParaBroncearse())
+		assert.equals(10, salidaDeTrekking.diasDeActividad())
+		assert.that(salidaDeTrekking.esInteresante())		
+	}
+	test "clases de gym" {
+		assert.that(clasesDeGym.implicaEsfuerzo())
+		assert.notThat(clasesDeGym.sirveParaBroncearse())
+		assert.equals(1, clasesDeGym.diasDeActividad())
+		assert.equals(1, clasesDeGym.idiomas().size())		
+	}
+	test "Taller Literario" {
+		assert.that(tallerLiterario.implicaEsfuerzo())
+		assert.notThat(tallerLiterario.sirveParaBroncearse())
+		assert.equals(2, tallerLiterario.diasDeActividad())
+		assert.equals(3, tallerLiterario.idiomas().size())		
+	}
+	test "test roque"{
+		assert.that(roque.esAdoradorDelSol())
+		assert.equals(1, roque.actividadesEsforzadas().size())
+		assert.throwsException({roque.registrarActividad(new ClasesDeGym())})
+		assert.that(roque.leAtrae(salidaDeTrekking))
+		assert.that(roque.actividadRecomendada(salidaDeTrekking))
+		assert.notThat(roque.actividadRecomendada(viajesDePlaya))
+	}
+	test "test ana"{
+		assert.that(ana.esAdoradorDelSol())
+		assert.equals(1, ana.actividadesEsforzadas().size())
+		ana.registrarActividad(new ClasesDeGym())
+		assert.notThat(ana.esAdoradorDelSol())
+		assert.that(ana.leAtrae(salidaDeTrekking))
+		assert.that(roque.actividadRecomendada(salidaDeTrekking))
+		assert.notThat(roque.actividadRecomendada(viajesDePlaya))
+	}
+	test "test pepita"{
+		assert.that(pepita.esAdoradorDelSol())
+		assert.that(pepita.leAtrae(viajesDePlaya))
+		assert.that(roque.actividadRecomendada(salidaDeTrekking))
+		assert.notThat(roque.actividadRecomendada(viajesDePlaya))
+	}
+}
